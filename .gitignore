@@ -1,0 +1,14 @@
+# build
+build/*
+!build/www
+CMakeCache.txt
+CMakeFiles/
+cmake-build-*/
+*.o
+*.a
+*.so
+
+# editor
+.idea/
+.vscode/
+*.swp
