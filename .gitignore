@@ -1,6 +1,6 @@
 # build
-build/*
-!build/www
+**/build/*
+!**/build/www
 CMakeCache.txt
 CMakeFiles/
 cmake-build-*/
@@ -12,3 +12,19 @@ cmake-build-*/
 .idea/
 .vscode/
 *.swp
+
+# local secrets
+chat2ExcelEasy/.env
+*.env
+
+# 编辑器语言服务器（clangd）生成物
+.cache/
+
+# 编辑器语言服务器（clangd）生成物，含本机绝对路径
+compile_commands.json
+
+# TRAE share cache
+.trae-html-share-packages/
+
+# TRAE 本地规则（老师未入库）
+.trae/

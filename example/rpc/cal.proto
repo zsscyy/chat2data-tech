@@ -1,0 +1,18 @@
+syntax = "proto3";                   // 定义协议为 proto3
+package cal;                         // 定义一个包，用于组织相关的 RPC 服务 -- 类似与C++中的 namespace
+option cc_generic_services = true;    // 开启通用服务，用于支持 C++ 代码中的通用服务
+
+
+// 定义一些加减乘除的RPC接口
+message AddReq {
+    int32 num1 = 1;
+    int32 num2 = 2;
+};
+
+message AddRsp {
+    int32 result = 1;
+};
+
+service CalService {
+    rpc Add(AddReq) returns (AddRsp);
+};
