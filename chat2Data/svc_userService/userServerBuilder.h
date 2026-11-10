@@ -25,7 +25,7 @@ struct registerCenterConfig {
  * @brief 用户子服务构建器
  *
  * 使用建造者模式逐项设置配置，由 build() 统一完成 MySQL/Redis/数据层/业务层/
- * RPC接口/RPC服务器/服务发现/服务注册的组装，与课件第 7 篇要求一致。
+ * RPC接口/RPC服务器/服务发现/服务注册的组装。
  */
 class UserServerBuilder {
 public:

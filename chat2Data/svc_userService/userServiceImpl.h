@@ -15,7 +15,7 @@ class UserBusiness;
 /**
  * @brief 用户子服务RPC接口实现
  *
- * 实现课件定义的 9 个RPC接口，并补充网关章节 bugfix 追加的 IsSessionValid 接口。
+ * 实现 10 个 RPC 接口，并补充网关章节 bugfix 追加的 IsSessionValid 接口。
  */
 class UserServiceImpl : public ::chat2Data::userService::UserService {
 public:

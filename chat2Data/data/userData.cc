@@ -31,6 +31,13 @@ constexpr const char* USER_EMAIL_KEY_PREFIX = "user:email:";
 // 用户信息缓存过期时间，1小时
 constexpr long long USER_CACHE_TTL_SECONDS = 60 * 60;
 
+// 用户缓存 JSON 字段名
+constexpr const char* USER_JSON_FIELD_USER_ID = "userId";
+constexpr const char* USER_JSON_FIELD_NICKNAME = "nickname";
+constexpr const char* USER_JSON_FIELD_PASSWORD = "password";
+constexpr const char* USER_JSON_FIELD_EMAIL = "email";
+constexpr const char* USER_JSON_FIELD_STATUS = "status";
+
 /**
  * @brief 拼接用户缓存 key
  * @param prefix key 前缀
@@ -224,11 +231,11 @@ void UserData::cacheUser(const UserEntity& user) {
     try {
         // 1. 序列化为 JSON 字符串
         Json::Value userJson;
-        userJson["userId"] = user.getUserId();
-        userJson["nickname"] = user.getNickname();
-        userJson["password"] = user.getPassword();
-        userJson["email"] = user.getEmail();
-        userJson["status"] = static_cast<int>(user.getStatus());
+        userJson[USER_JSON_FIELD_USER_ID] = user.getUserId();
+        userJson[USER_JSON_FIELD_NICKNAME] = user.getNickname();
+        userJson[USER_JSON_FIELD_PASSWORD] = user.getPassword();
+        userJson[USER_JSON_FIELD_EMAIL] = user.getEmail();
+        userJson[USER_JSON_FIELD_STATUS] = static_cast<int>(user.getStatus());
 
         std::optional<std::string> jsonStr = biteutil::JSON::serialize(userJson);
         if (!jsonStr.has_value()) {
@@ -242,7 +249,7 @@ void UserData::cacheUser(const UserEntity& user) {
         _redis->setex(makeUserKey(USER_NICKNAME_KEY_PREFIX, user.getNickname()), ttl, jsonStr.value());
         _redis->setex(makeUserKey(USER_EMAIL_KEY_PREFIX, user.getEmail()), ttl, jsonStr.value());
     } catch (const Chat2DataException&) {
-        // 缓存写失败必须让调用方感知（课件 5.6），直接上抛
+        // 缓存写失败必须让调用方感知，直接上抛
         throw;
     } catch (const std::exception& e) {
         ERR("回填用户缓存失败, userId: {}, 原因: {}", user.getUserId(), e.what());
@@ -289,15 +296,16 @@ std::optional<UserEntity> UserData::loadUserFromCache(const std::string& key) {
     }
 
     const Json::Value& value = userJson.value();
-    if (!value.isMember("userId") || !value.isMember("nickname") || !value.isMember("email") ||
-        !value.isMember("password") || !value.isMember("status")) {
+    if (!value.isMember(USER_JSON_FIELD_USER_ID) || !value.isMember(USER_JSON_FIELD_NICKNAME) ||
+        !value.isMember(USER_JSON_FIELD_EMAIL) || !value.isMember(USER_JSON_FIELD_PASSWORD) ||
+        !value.isMember(USER_JSON_FIELD_STATUS)) {
         WRN("用户缓存字段不完整, key: {}", key);
         return std::nullopt;
     }
 
-    const UserStatus status = static_cast<UserStatus>(value["status"].asInt());
-    return UserEntity(value["userId"].asString(), value["nickname"].asString(), value["email"].asString(),
-                      value["password"].asString(), status);
+    const UserStatus status = static_cast<UserStatus>(value[USER_JSON_FIELD_STATUS].asInt());
+    return UserEntity(value[USER_JSON_FIELD_USER_ID].asString(), value[USER_JSON_FIELD_NICKNAME].asString(),
+                      value[USER_JSON_FIELD_EMAIL].asString(), value[USER_JSON_FIELD_PASSWORD].asString(), status);
 }
 
 } // namespace userService
