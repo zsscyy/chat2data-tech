@@ -21,7 +21,7 @@ DEFINE_string(conf, "", "配置文件路径（gflags flagfile 格式）");
 // ---------- 服务配置 ----------
 DEFINE_int32(listen_port, 9100, "服务监听端口");
 DEFINE_string(service_name, "UserService", "服务名称，用于etcd注册");
-DEFINE_string(service_addr, "0.0.0.0", "服务注册地址");
+DEFINE_string(service_addr, "127.0.0.1", "服务注册地址（必须是其他服务可达的地址，不要填0.0.0.0）");
 DEFINE_string(notify_service, "NotifyService", "通知子服务名称");
 DEFINE_string(db_service, "DatabaseService", "数据库子服务名称");
 DEFINE_string(etcd_addr, "http://dev-etcd:2379", "ETCD注册中心地址");
@@ -134,6 +134,10 @@ int main(int argc, char* argv[]) {
     // 4. 校验MySQL与Redis配置
     if (FLAGS_mysql_host.empty() || FLAGS_redis_host.empty()) {
         ERR("MySQL或Redis主机未配置, mysql: {}, redis: {}", FLAGS_mysql_host, FLAGS_redis_host);
+        return PROGRAM_EXIT_FAILED;
+    }
+    if (FLAGS_service_addr.empty() || FLAGS_service_addr == "0.0.0.0") {
+        ERR("服务注册地址必须是其他服务可达的地址，不能使用空值或0.0.0.0");
         return PROGRAM_EXIT_FAILED;
     }
 

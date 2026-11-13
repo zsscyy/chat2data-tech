@@ -3,6 +3,21 @@
 
 namespace chat2Data {
 
+namespace {
+// 操作成功错误码
+constexpr int SUCCESS_CODE_VALUE = 0;
+// 每个子服务错误码段的长度
+constexpr int SERVICE_CODE_RANGE_SIZE = 100;
+// 各子服务错误码段起始值
+constexpr int USER_SERVICE_CODE_BASE = 100;
+constexpr int FILE_SERVICE_CODE_BASE = 200;
+constexpr int DB_SERVICE_CODE_BASE = 300;
+constexpr int EXCEL_SERVICE_CODE_BASE = 400;
+constexpr int NOTIFY_SERVICE_CODE_BASE = 500;
+constexpr int AI_SERVICE_CODE_BASE = 600;
+constexpr int GATEWAY_SERVICE_CODE_BASE = 700;
+} // namespace
+
 std::string error2String(ErrorCode code) {
     static std::unordered_map<ErrorCode, std::string> errorMap = {
         {ErrorCode::SUCCESS, "操作成功"},
@@ -110,23 +125,27 @@ std::string error2String(ErrorCode code) {
 std::string getServiceName(ErrorCode code) {
     int codeValue = static_cast<int>(code);
     
-    if (codeValue == 0) {
+    if (codeValue == SUCCESS_CODE_VALUE) {
         return "请求操作成功";
     }
     
-    if (codeValue >= 100 && codeValue <= 199) {
+    if (codeValue >= USER_SERVICE_CODE_BASE && codeValue < USER_SERVICE_CODE_BASE + SERVICE_CODE_RANGE_SIZE) {
         return "userService";
-    } else if (codeValue >= 200 && codeValue <= 299) {
+    } else if (codeValue >= FILE_SERVICE_CODE_BASE &&
+               codeValue < FILE_SERVICE_CODE_BASE + SERVICE_CODE_RANGE_SIZE) {
         return "fileService";
-    } else if (codeValue >= 300 && codeValue <= 399) {
+    } else if (codeValue >= DB_SERVICE_CODE_BASE && codeValue < DB_SERVICE_CODE_BASE + SERVICE_CODE_RANGE_SIZE) {
         return "dbService";
-    } else if (codeValue >= 400 && codeValue <= 499) {
+    } else if (codeValue >= EXCEL_SERVICE_CODE_BASE &&
+               codeValue < EXCEL_SERVICE_CODE_BASE + SERVICE_CODE_RANGE_SIZE) {
         return "excelService";
-    } else if (codeValue >= 500 && codeValue <= 599) {
+    } else if (codeValue >= NOTIFY_SERVICE_CODE_BASE &&
+               codeValue < NOTIFY_SERVICE_CODE_BASE + SERVICE_CODE_RANGE_SIZE) {
         return "notifyService";
-    } else if (codeValue >= 600 && codeValue <= 699) {
+    } else if (codeValue >= AI_SERVICE_CODE_BASE && codeValue < AI_SERVICE_CODE_BASE + SERVICE_CODE_RANGE_SIZE) {
         return "aiService";
-    } else if (codeValue >= 700 && codeValue <= 799) {
+    } else if (codeValue >= GATEWAY_SERVICE_CODE_BASE &&
+               codeValue < GATEWAY_SERVICE_CODE_BASE + SERVICE_CODE_RANGE_SIZE) {
         return "gatewayService";
     }
     

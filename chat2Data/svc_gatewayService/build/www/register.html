@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>注册 - Chat2Data</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="auth-page">
+<main class="auth-card auth-card-wide">
+    <div class="brand">
+        <span class="brand-mark">C2</span>
+        <span>Chat2Data</span>
+    </div>
+    <p class="auth-subtitle">创建账号，开始使用 AI 数据分析助手</p>
+
+    <form id="register-form" novalidate>
+        <div class="form-group">
+            <label class="form-label" for="nickname">昵称</label>
+            <input class="form-input" id="nickname" name="nickname" type="text"
+                   placeholder="请输入昵称" autocomplete="nickname">
+            <div class="field-hint" id="nickname-hint"></div>
+        </div>
+        <div class="form-group">
+            <label class="form-label" for="email">邮箱</label>
+            <input class="form-input" id="email" name="email" type="email"
+                   placeholder="请输入邮箱" autocomplete="email">
+            <div class="field-hint" id="email-hint"></div>
+        </div>
+        <div class="form-group">
+            <label class="form-label" for="password">密码</label>
+            <input class="form-input" id="password" name="password" type="password"
+                   placeholder="至少6位，不能包含空格" autocomplete="new-password">
+        </div>
+        <div class="form-group">
+            <label class="form-label" for="confirm-password">确认密码</label>
+            <input class="form-input" id="confirm-password" name="confirmPassword" type="password"
+                   placeholder="请再次输入密码" autocomplete="new-password">
+        </div>
+
+        <button class="btn-primary" id="register-submit" type="submit">注册</button>
+    </form>
+
+    <div id="message" class="message"></div>
+
+    <div class="auth-footer">
+        已有账号？<a href="/login.html">返回登录</a>
+    </div>
+</main>
+
+<script src="/js/config.js"></script>
+<script src="/js/api.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/register.js"></script>
+</body>
+</html>

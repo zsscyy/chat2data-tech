@@ -42,6 +42,10 @@ constexpr const char* USER_ID_KEY_PREFIX = "user:userId:";
 constexpr const char* USER_NICKNAME_KEY_PREFIX = "user:nickname:";
 constexpr const char* USER_EMAIL_KEY_PREFIX = "user:email:";
 constexpr long long USER_CACHE_TTL_SECONDS = 60 * 60;
+// TTL 检查容差，避免读写之间耗时导致断言失败
+constexpr long long TTL_CHECK_TOLERANCE_SECONDS = 100;
+// 幽灵缓存用例的短 TTL
+constexpr long long GHOST_CACHE_TTL_SECONDS = 60;
 
 /**
  * @brief 用户数据访问层单元测试
@@ -137,7 +141,7 @@ TEST_F(UserDataTest, InsertAndQueryById) {
     EXPECT_EQ(queried->getStatus(), UserStatus::Offline);
 
     const long long ttl = s_redis->ttl(std::string(USER_ID_KEY_PREFIX) + TEST_USER_ID);
-    EXPECT_GT(ttl, USER_CACHE_TTL_SECONDS - 100);
+    EXPECT_GT(ttl, USER_CACHE_TTL_SECONDS - TTL_CHECK_TOLERANCE_SECONDS);
     EXPECT_LE(ttl, USER_CACHE_TTL_SECONDS);
 
     // 缓存 value 为 JSON 字符串，不是 hash
@@ -179,7 +183,7 @@ TEST_F(UserDataTest, QueryByNicknameAndEmail) {
  */
 TEST_F(UserDataTest, ExistsCheckBypassesCache) {
     // 只往缓存写一条昵称记录，数据库里没有这个用户
-    s_redis->setex(std::string(USER_NICKNAME_KEY_PREFIX) + TEST_GHOST_NICKNAME, 60,
+    s_redis->setex(std::string(USER_NICKNAME_KEY_PREFIX) + TEST_GHOST_NICKNAME, GHOST_CACHE_TTL_SECONDS,
                    "{\"userId\":\"ghost\",\"nickname\":\"ghost_nick_0001\"}");
 
     // 存在性检测直接查 MySQL，应返回 false

@@ -24,6 +24,7 @@ add_subdirectory(common)
 add_subdirectory(proto)
 add_subdirectory(data)
 add_subdirectory(svc_userService)
+add_subdirectory(svc_notifyService)
 
 # 单元测试：直连 dev-mysql / dev-redis，通过 ctest 运行
 add_subdirectory(test/svc_userService/userData)

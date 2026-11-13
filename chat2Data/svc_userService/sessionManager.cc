@@ -24,6 +24,14 @@ std::string SessionManager::createSession(const std::string& userId) {
     return sessionId;
 }
 
+bool SessionManager::isSessionValid(const std::string& sessionId) {
+    if (sessionId.empty()) {
+        return false;
+    }
+    const std::optional<chat2Data::SessionEntity> session = _sessionData->getSessionById(sessionId);
+    return session.has_value();
+}
+
 bool SessionManager::deleteSession(const std::string& sessionId) {
     if (!_sessionData->deleteSession(sessionId)) {
         ERR("删除会话失败, sessionId: {}", sessionId);

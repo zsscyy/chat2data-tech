@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 - Chat2Data</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="auth-page">
+<main class="auth-card">
+    <div class="brand">
+        <span class="brand-mark">C2</span>
+        <span>Chat2Data</span>
+    </div>
+    <p class="auth-subtitle">基于 AI 的数据分析助手，登录后开始使用</p>
+
+    <div class="auth-tabs">
+        <button type="button" class="auth-tab active" data-tab="password">密码登录</button>
+        <button type="button" class="auth-tab" data-tab="verify">验证码登录</button>
+    </div>
+
+    <form id="password-form" novalidate>
+        <div class="form-group">
+            <label class="form-label" for="username">昵称 / 邮箱</label>
+            <input class="form-input" id="username" name="username" type="text"
+                   placeholder="请输入昵称或邮箱" autocomplete="username">
+        </div>
+        <div class="form-group">
+            <label class="form-label" for="password">密码</label>
+            <input class="form-input" id="password" name="password" type="password"
+                   placeholder="请输入密码" autocomplete="current-password">
+        </div>
+        <button class="btn-primary" id="password-submit" type="submit">登录</button>
+    </form>
+
+    <form id="verify-form" class="form-hidden" novalidate>
+        <div class="form-group">
+            <label class="form-label" for="email">邮箱</label>
+            <input class="form-input" id="email" name="email" type="email"
+                   placeholder="请输入注册邮箱" autocomplete="email">
+        </div>
+        <div class="form-group">
+            <label class="form-label" for="verify-code">验证码</label>
+            <div class="input-with-button">
+                <input class="form-input" id="verify-code" name="verifyCode" type="text"
+                       placeholder="请输入邮箱验证码" maxlength="8" autocomplete="one-time-code">
+                <button class="btn-code" id="code-button" type="button">获取验证码</button>
+            </div>
+        </div>
+        <button class="btn-primary" id="verify-submit" type="submit">登录</button>
+    </form>
+
+    <div id="message" class="message"></div>
+
+    <div class="auth-footer">
+        还没有账号？<a href="/register.html">立即注册</a>
+    </div>
+</main>
+
+<script src="/js/config.js"></script>
+<script src="/js/api.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/login.js"></script>
+</body>
+</html>

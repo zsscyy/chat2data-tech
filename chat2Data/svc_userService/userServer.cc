@@ -49,6 +49,12 @@ bool UserServer::start() {
     if (_svcProvider) {
         if (!_svcProvider->registry()) {
             ERR("register to etcd failed");
+            // RpcServerFactory 已经启动 brpc；注册失败时立即关闭，避免留下未注册服务。
+            if (_server) {
+                _server->Stop(SERVER_STOP_WAIT_MILLISECONDS);
+                _server.reset();
+            }
+            _svcProvider.reset();
             return false;
         }
         INF("service registered to etcd");

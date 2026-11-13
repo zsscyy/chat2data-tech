@@ -6,14 +6,22 @@
 #
 # 依赖：common、proto、dataAccess、dataEntity、bite_scaffold（brpc/etcd/redis/spdlog/gflags）
 #
-# 构建方式（在 chat2Data 父目录执行）：
-#   mkdir build && cd build
-#   cmake .. && make
+# 构建方式：
+#   1) 推荐在 chat2Data 父目录构建：cmake -S . -B build && cmake --build build
+#   2) 也可在本目录独立构建：cmake -S . -B build && cmake --build build
 #
 # ==============================================================================
 cmake_minimum_required(VERSION 3.10)
 
 project(UserService)
+
+# 独立构建时，父工程未引入 common/proto/data，需要在此补齐，
+# 否则 errorHandler.h 等公共头文件找不到，且 common/proto 等库目标不存在
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../common ${CMAKE_CURRENT_BINARY_DIR}/common)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../proto ${CMAKE_CURRENT_BINARY_DIR}/proto)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../data ${CMAKE_CURRENT_BINARY_DIR}/data)
+endif()
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

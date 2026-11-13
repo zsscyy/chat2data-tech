@@ -23,6 +23,8 @@ constexpr const char* TEST_EMAIL = "test_code_0001@example.com";
 // 验证码缓存 key 前缀与过期时间，与数据访问层实现保持一致
 constexpr const char* VERIFY_CODE_KEY_PREFIX = "verifyCode:";
 constexpr long long VERIFY_CODE_TTL_SECONDS = 5 * 60;
+// TTL 检查容差，避免读写之间耗时导致断言失败
+constexpr long long TTL_CHECK_TOLERANCE_SECONDS = 60;
 // 过期用例中把 TTL 改成 1 秒，等待 2 秒后 key 应被 Redis 清理
 constexpr long long SHORT_TTL_SECONDS = 1;
 constexpr int EXPIRE_WAIT_SECONDS = 2;
@@ -98,7 +100,7 @@ TEST_F(CodeDataTest, SaveAndQuery) {
     EXPECT_NE(json.find("\"verifyCode\""), std::string::npos);
 
     const long long ttl = s_redis->ttl(key);
-    EXPECT_GT(ttl, VERIFY_CODE_TTL_SECONDS - 60);
+    EXPECT_GT(ttl, VERIFY_CODE_TTL_SECONDS - TTL_CHECK_TOLERANCE_SECONDS);
     EXPECT_LE(ttl, VERIFY_CODE_TTL_SECONDS);
 
     // 读策略：读取不删除 key，验证码在 TTL 到期前可重复读取

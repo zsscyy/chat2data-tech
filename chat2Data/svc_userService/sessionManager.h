@@ -32,6 +32,13 @@ public:
     std::string createSession(const std::string& userId);
 
     /**
+     * @brief 检测会话是否有效
+     * @param sessionId 会话id
+     * @return 会话存在且未过期返回 true
+     */
+    bool isSessionValid(const std::string& sessionId);
+
+    /**
      * @brief 删除会话
      * @param sessionId 会话id
      * @return 删除成功返回 true

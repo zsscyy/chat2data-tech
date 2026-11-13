@@ -10,6 +10,7 @@
 #include <bite_scaffold/log.h>
 #include <bite_scaffold/odb.h>
 #include <bite_scaffold/redis.h>
+#include <bite_scaffold/util.h>
 
 #include "sessionData.h"
 #include "sessionEntity-odb.hxx"
@@ -26,6 +27,8 @@ constexpr const char* TEST_SESSION_ID_2 = "test_session_0002";
 // 会话缓存 key 前缀与过期时间，与数据访问层实现保持一致
 constexpr const char* SESSION_KEY_PREFIX = "session:";
 constexpr long long SESSION_CACHE_TTL_SECONDS = 3LL * 24 * 60 * 60;
+// TTL 检查容差，避免读写之间耗时导致断言失败
+constexpr long long TTL_CHECK_TOLERANCE_SECONDS = 100;
 
 /**
  * @brief 会话数据访问层单元测试
@@ -106,13 +109,16 @@ TEST_F(SessionDataTest, InsertAndQueryById) {
     EXPECT_EQ(queried->getUserId(), TEST_USER_ID);
 
     const long long ttl = s_redis->ttl(std::string(SESSION_KEY_PREFIX) + TEST_SESSION_ID);
-    EXPECT_GT(ttl, SESSION_CACHE_TTL_SECONDS - 100);
+    EXPECT_GT(ttl, SESSION_CACHE_TTL_SECONDS - TTL_CHECK_TOLERANCE_SECONDS);
     EXPECT_LE(ttl, SESSION_CACHE_TTL_SECONDS);
 
-    // 缓存 value 为 JSON 字符串，不是 hash
+    // 缓存类型为 JSON string，字段为 sessionId 与 userId
     const std::string key = std::string(SESSION_KEY_PREFIX) + TEST_SESSION_ID;
     EXPECT_EQ(s_redis->type(key), "string");
-    EXPECT_NE(s_redis->get(key).value_or("").find("\"sessionId\""), std::string::npos);
+    const auto json = biteutil::JSON::unserialize(s_redis->get(key).value_or(""));
+    ASSERT_TRUE(json.has_value());
+    EXPECT_EQ((*json)["sessionId"].asString(), TEST_SESSION_ID);
+    EXPECT_EQ((*json)["userId"].asString(), TEST_USER_ID);
 
     // 再次查询应命中缓存，缓存构造的实体没有数据库主键 id
     auto cached = s_sessionData->getSessionById(TEST_SESSION_ID);
@@ -125,7 +131,7 @@ TEST_F(SessionDataTest, InsertAndQueryById) {
  */
 TEST_F(SessionDataTest, InsertSessionRemovesStaleCache) {
     const std::string key = std::string(SESSION_KEY_PREFIX) + TEST_SESSION_ID;
-    s_redis->setex(key, 60, "{\"sessionId\":\"stale\",\"userId\":\"stale_user\"}");
+    s_redis->set(key, R"({"sessionId":"stale","userId":"stale_user"})");
     ASSERT_EQ(s_redis->exists(key), 1);
 
     ASSERT_TRUE(s_sessionData->insertSession(TEST_SESSION_ID, TEST_USER_ID));

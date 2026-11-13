@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>首页 - Chat2Data</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="app-page">
+<header class="app-header">
+    <div class="brand">
+        <span class="brand-mark">C2</span>
+        <span>Chat2Data</span>
+    </div>
+    <div class="app-header-right">
+        <div class="user-badge">
+            <span class="user-avatar" id="user-avatar">U</span>
+            <span id="header-nickname">加载中...</span>
+        </div>
+        <button class="btn-secondary" id="logout-button" type="button">退出登录</button>
+    </div>
+</header>
+
+<main class="app-main">
+    <div id="page-loading" class="loading-block">
+        <div class="spinner"></div>
+        <div>正在加载用户信息...</div>
+    </div>
+
+    <div id="page-content" class="form-hidden">
+        <div id="message" class="message"></div>
+
+        <section class="panel">
+            <h1 class="panel-title" id="welcome-title">欢迎回来</h1>
+            <p class="panel-desc">您已成功登录 Chat2Data，以下是当前账号信息。</p>
+
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">用户ID</div>
+                    <div class="info-value" id="user-id">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">昵称</div>
+                    <div class="info-value" id="user-nickname">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">邮箱</div>
+                    <div class="info-value" id="user-email">-</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel">
+            <h2 class="panel-title">功能状态</h2>
+            <p class="panel-desc">当前网关已开放用户子服务接口，其余业务模块正在建设中。</p>
+            <div class="status-list">
+                <div class="status-item">
+                    <span class="status-name">用户注册与登录</span>
+                    <span class="status-tag done">已开放</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-name">智能 Excel 助手</span>
+                    <span class="status-tag pending">待开放</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-name">智能 DB 助手</span>
+                    <span class="status-tag pending">待开放</span>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+
+<script src="/js/config.js"></script>
+<script src="/js/api.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/index.js"></script>
+</body>
+</html>

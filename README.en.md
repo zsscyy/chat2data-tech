@@ -1,7 +1,7 @@
 # chat2Data-tech
 
 #### Description
-chat2Data教学仓库
+chat2Data 项目仓库
 
 #### Software Architecture
 Software architecture description

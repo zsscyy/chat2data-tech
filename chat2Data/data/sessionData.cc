@@ -1,6 +1,7 @@
 #include "sessionData.h"
 
 #include <chrono>
+#include <optional>
 #include <string>
 #include <utility>
 
@@ -24,6 +25,10 @@ namespace {
 
 // 会话缓存 key 前缀
 constexpr const char* SESSION_KEY_PREFIX = "session:";
+
+// 会话缓存 JSON 字段名
+constexpr const char* SESSION_JSON_FIELD_SESSION_ID = "sessionId";
+constexpr const char* SESSION_JSON_FIELD_USER_ID = "userId";
 
 // 会话缓存过期时间，3天
 constexpr long long SESSION_CACHE_TTL_SECONDS = 3 * 24 * 60 * 60;
@@ -111,21 +116,19 @@ bool SessionData::deleteSession(const std::string& sessionId) {
 }
 
 void SessionData::cacheSession(const SessionEntity& session) {
+    const std::string key = makeSessionKey(session.getSessionId());
     try {
         // 1. 序列化为 JSON 字符串
         Json::Value sessionJson;
-        sessionJson["sessionId"] = session.getSessionId();
-        sessionJson["userId"] = session.getUserId();
-
-        std::optional<std::string> jsonStr = biteutil::JSON::serialize(sessionJson);
+        sessionJson[SESSION_JSON_FIELD_SESSION_ID] = session.getSessionId();
+        sessionJson[SESSION_JSON_FIELD_USER_ID] = session.getUserId();
+        const std::optional<std::string> jsonStr = biteutil::JSON::serialize(sessionJson);
         if (!jsonStr.has_value()) {
-            ERR("序列化会话缓存失败, sessionId: {}", session.getSessionId());
             throw Chat2DataException(ErrorCode::USER_SESSION_CACHE_ERROR);
         }
 
-        // 2. 写入 Redis，TTL 3 天；写缓存失败必须抛异常
-        _redis->setex(makeSessionKey(session.getSessionId()), std::chrono::seconds(SESSION_CACHE_TTL_SECONDS),
-                      jsonStr.value());
+        // 2. 写入 Redis，TTL 3 天
+        _redis->setex(key, std::chrono::seconds(SESSION_CACHE_TTL_SECONDS), jsonStr.value());
     } catch (const std::exception& e) {
         ERR("回填会话缓存失败, sessionId: {}, 原因: {}", session.getSessionId(), e.what());
         throw Chat2DataException(ErrorCode::USER_SESSION_CACHE_ERROR);
@@ -145,19 +148,20 @@ std::optional<SessionEntity> SessionData::loadSessionFromCache(const std::string
         return std::nullopt;
     }
 
-    std::optional<Json::Value> sessionJson = biteutil::JSON::unserialize(jsonStr.value());
-    if (!sessionJson.has_value() || !sessionJson->isObject()) {
-        WRN("会话缓存反序列化失败, sessionId: {}", sessionId);
-        return std::nullopt;
-    }
-
-    const Json::Value& value = sessionJson.value();
-    if (!value.isMember("sessionId") || !value.isMember("userId")) {
+    const std::optional<Json::Value> sessionJson = biteutil::JSON::unserialize(jsonStr.value());
+    if (!sessionJson.has_value() || !sessionJson->isObject() ||
+        !sessionJson->isMember(SESSION_JSON_FIELD_SESSION_ID) || !sessionJson->isMember(SESSION_JSON_FIELD_USER_ID)) {
         WRN("会话缓存字段不完整, sessionId: {}", sessionId);
         return std::nullopt;
     }
 
-    return SessionEntity(value["sessionId"].asString(), value["userId"].asString());
+    const std::string cachedSessionId = (*sessionJson)[SESSION_JSON_FIELD_SESSION_ID].asString();
+    const std::string userId = (*sessionJson)[SESSION_JSON_FIELD_USER_ID].asString();
+    if (cachedSessionId.empty() || userId.empty()) {
+        WRN("会话缓存字段为空, sessionId: {}", sessionId);
+        return std::nullopt;
+    }
+    return SessionEntity(cachedSessionId, userId);
 }
 
 } // namespace userService

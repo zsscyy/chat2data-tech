@@ -30,6 +30,10 @@ constexpr std::size_t BASE64_GROUP_BYTES = 3;
 constexpr std::size_t BASE64_GROUP_CHARS = 4;
 // 取6位有效位的掩码
 constexpr unsigned int BASE64_CHAR_MASK = 0x3F;
+// 每组3字节组装为24位整数时，第1个字节的左移位数
+constexpr int BASE64_FIRST_BYTE_SHIFT = 16;
+// 每组3字节组装为24位整数时，第2个字节的左移位数
+constexpr int BASE64_SECOND_BYTE_SHIFT = 8;
 // 每组3字节左移的位数，使首字节占据最高6位
 constexpr int BASE64_FIRST_CHAR_SHIFT = 18;
 // 每组3字节左移的位数，使第2个6位组落到正确位置
@@ -88,7 +92,8 @@ std::string Utils::base64Encode(const unsigned char* data, std::size_t length) {
         const unsigned int firstByte = data[offset];
         const unsigned int secondByte = (offset + 1 < length) ? data[offset + 1] : 0;
         const unsigned int thirdByte = (offset + 2 < length) ? data[offset + 2] : 0;
-        const unsigned int triple = (firstByte << 16) | (secondByte << 8) | thirdByte;
+        const unsigned int triple =
+            (firstByte << BASE64_FIRST_BYTE_SHIFT) | (secondByte << BASE64_SECOND_BYTE_SHIFT) | thirdByte;
 
         encoded.push_back(BASE64_TABLE[(triple >> BASE64_FIRST_CHAR_SHIFT) & BASE64_CHAR_MASK]);
         encoded.push_back(BASE64_TABLE[(triple >> BASE64_SECOND_CHAR_SHIFT) & BASE64_CHAR_MASK]);

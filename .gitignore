@@ -26,5 +26,5 @@ compile_commands.json
 # TRAE share cache
 .trae-html-share-packages/
 
-# TRAE 本地规则（老师未入库）
+# TRAE 本地规则（未入库）
 .trae/

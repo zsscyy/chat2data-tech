@@ -154,9 +154,13 @@ void UserServiceImpl::SessionLogin(::google::protobuf::RpcController* controller
 
     try {
         // 3. 业务逻辑处理：会话登录
-        _userBusiness->loginWithSession(request->session_id());
+        if (!_userBusiness->loginWithSession(request->session_id())) {
+            // 4. 设置RPC响应：会话登录失败
+            fillError(response, chat2Data::ErrorCode::USER_SESSION_LOGIN_FAILED);
+            return;
+        }
 
-        // 4. 设置RPC响应
+        // 4. 设置RPC响应：会话登录成功
         fillSuccess(response);
         INF("会话登录RPC成功, requestId: {}", request->request_id());
     } catch (const chat2Data::Chat2DataException& e) {
@@ -294,9 +298,13 @@ void UserServiceImpl::Logout(::google::protobuf::RpcController* controller,
 
     try {
         // 3. 业务逻辑处理：退出登录
-        _userBusiness->logout(request->session_id());
+        if (!_userBusiness->logout(request->session_id())) {
+            // 4. 设置RPC响应：退出登录失败
+            fillError(response, chat2Data::ErrorCode::USER_LOGOUT_FAILED);
+            return;
+        }
 
-        // 4. 设置RPC响应
+        // 4. 设置RPC响应：退出登录成功
         fillSuccess(response);
         INF("退出登录RPC成功, requestId: {}", request->request_id());
     } catch (const chat2Data::Chat2DataException& e) {

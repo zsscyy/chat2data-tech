@@ -1,7 +1,7 @@
 # chat2Data-tech
 
 #### 介绍
-chat2Data教学仓库
+chat2Data 项目仓库
 
 #### 软件架构
 软件架构说明

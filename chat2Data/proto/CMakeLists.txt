@@ -7,10 +7,12 @@
 #   2. 生成结果统一输出到本目录的 protoCode 子目录
 #   3. 所有生成文件打包为静态库 proto，供各子服务链接
 #
-# 新增 proto 文件后重新执行 cmake/make 即可自动纳入构建。
+# 新增、删除、重命名 proto 文件后，直接重新执行 cmake --build/make 即可，
+# 无需修改本文件，也无需手动重跑 cmake：CONFIGURE_DEPENDS 会在构建时
+# 自动检测目录变化并重新扫描。
 #
 # ==============================================================================
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.12)
 
 find_program(PROTOC_EXECUTABLE protoc REQUIRED)
 
@@ -19,23 +21,26 @@ set(PROTO_CODE_DIR ${PROTO_SOURCE_DIR}/protoCode)
 
 file(MAKE_DIRECTORY ${PROTO_CODE_DIR})
 
-# 扫描全部 proto 文件
-file(GLOB PROTO_FILES ${PROTO_SOURCE_DIR}/*.proto)
+# 扫描全部 proto 文件；CONFIGURE_DEPENDS 保证新增文件无需手动重新配置
+file(GLOB PROTO_FILES CONFIGURE_DEPENDS ${PROTO_SOURCE_DIR}/*.proto)
 
 set(PROTO_GENERATED_FILES)
 foreach(PROTO_FILE ${PROTO_FILES})
-    get_filename_component(PROTO_NAME ${PROTO_FILE} NAME_WE)
+    get_filename_component(PROTO_FILE_NAME ${PROTO_FILE} NAME)
+    string(REGEX REPLACE "\\.proto$" "" PROTO_NAME ${PROTO_FILE_NAME})
     set(PROTO_GENERATED_HEADER ${PROTO_CODE_DIR}/${PROTO_NAME}.pb.h)
     set(PROTO_GENERATED_SOURCE ${PROTO_CODE_DIR}/${PROTO_NAME}.pb.cc)
 
+    # 依赖全部 proto 文件：任一 proto 变化（含被 import 的公共 proto）都会重新生成
     add_custom_command(
         OUTPUT ${PROTO_GENERATED_HEADER} ${PROTO_GENERATED_SOURCE}
         COMMAND ${PROTOC_EXECUTABLE}
                 --proto_path=${PROTO_SOURCE_DIR}
                 --cpp_out=${PROTO_CODE_DIR}
                 ${PROTO_FILE}
-        DEPENDS ${PROTO_FILE}
+        DEPENDS ${PROTO_FILES}
         COMMENT "Generating protobuf code for ${PROTO_NAME}.proto"
+        VERBATIM
     )
 
     list(APPEND PROTO_GENERATED_FILES ${PROTO_GENERATED_HEADER} ${PROTO_GENERATED_SOURCE})

@@ -99,14 +99,10 @@ std::shared_ptr<UserServer> UserServerBuilder::build() {
     watcherThread.detach();
     INF("service watcher started, etcd: {}", _etcdAddr);
 
-    // 6. 创建服务注册对象并注册到 etcd
+    // 6. 创建服务注册对象，实际注册由 UserServer::start() 执行
     auto provider = std::make_shared<bitesvc::SvcProvider>(
         _registerCenterConfig._etcdAddr, _registerCenterConfig._serviceName, _registerCenterConfig._serviceAddr);
-    if (!provider->registry()) {
-        ERR("Failed to register service: {}", _registerCenterConfig._serviceName);
-        return nullptr;
-    }
-
+    // 服务注册由 UserServer::start() 统一负责，避免构建阶段重复注册。
     // 7. 组装并返回 UserServer
     return std::make_shared<UserServer>(rawServiceImpl, rpcServer, watcher, provider);
 }

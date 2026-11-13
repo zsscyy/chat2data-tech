@@ -25,7 +25,7 @@ namespace userService {
  *   - 写：先写 MySQL，再删除 Redis
  *   - 读：先查 Redis，未命中再查 MySQL 并回填，TTL 3 天
  *
- * 会话缓存为 JSON 字符串，key：session:<sessionId>
+ * 会话缓存为 JSON string，key：session:<sessionId>，字段：sessionId、userId
  */
 class SessionData {
 public:
@@ -64,14 +64,14 @@ public:
 
 private:
     /**
-     * @brief 回填会话缓存
+     * @brief 回填会话缓存（JSON string 类型，同时设置 3 天 TTL）
      * @param session 会话实体
-     * @throws chat2Data::Chat2DataException 缓存序列化或写入失败（USER_SESSION_CACHE_ERROR）
+     * @throws chat2Data::Chat2DataException 缓存写入失败（USER_SESSION_CACHE_ERROR）
      */
     void cacheSession(const chat2Data::SessionEntity& session);
 
     /**
-     * @brief 从缓存读取会话
+     * @brief 从 JSON string 缓存读取会话
      * @param sessionId 会话id
      * @return 命中且字段完整返回会话实体，未命中或缓存异常返回空
      */

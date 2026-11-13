@@ -23,6 +23,12 @@ constexpr const char* VERIFY_CODE_KEY_PREFIX = "verifyCode:";
 // 验证码缓存过期时间，5 分钟
 constexpr long long VERIFY_CODE_TTL_SECONDS = 5 * 60;
 
+// 验证码缓存 JSON 字段名
+constexpr const char* CODE_JSON_FIELD_CODE_ID = "codeId";
+constexpr const char* CODE_JSON_FIELD_CODE = "verifyCode";
+constexpr const char* CODE_JSON_FIELD_EMAIL = "email";
+constexpr const char* CODE_JSON_FIELD_CREATE_TIME = "createTime";
+
 /**
  * @brief 拼接验证码缓存的 key
  * @param codeId 验证码id
@@ -41,10 +47,10 @@ bool VerifyCodeData::saveVerifyCode(const std::string& codeId, const std::string
     try {
         // 1. 序列化为 JSON 字符串
         Json::Value codeJson;
-        codeJson["codeId"] = codeId;
-        codeJson["verifyCode"] = code;
-        codeJson["email"] = email;
-        codeJson["createTime"] = std::to_string(static_cast<long long>(createTime));
+        codeJson[CODE_JSON_FIELD_CODE_ID] = codeId;
+        codeJson[CODE_JSON_FIELD_CODE] = code;
+        codeJson[CODE_JSON_FIELD_EMAIL] = email;
+        codeJson[CODE_JSON_FIELD_CREATE_TIME] = std::to_string(static_cast<long long>(createTime));
 
         std::optional<std::string> jsonStr = biteutil::JSON::serialize(codeJson);
         if (!jsonStr.has_value()) {
@@ -82,18 +88,18 @@ std::optional<VerifyCodeInfo> VerifyCodeData::getVerifyCode(const std::string& c
     }
 
     const Json::Value& value = codeJson.value();
-    if (!value.isMember("codeId") || !value.isMember("verifyCode") || !value.isMember("email") ||
-        !value.isMember("createTime")) {
+    if (!value.isMember(CODE_JSON_FIELD_CODE_ID) || !value.isMember(CODE_JSON_FIELD_CODE) ||
+        !value.isMember(CODE_JSON_FIELD_EMAIL) || !value.isMember(CODE_JSON_FIELD_CREATE_TIME)) {
         WRN("验证码缓存字段不完整, codeId: {}", codeId);
         return std::nullopt;
     }
 
     VerifyCodeInfo info;
-    info.codeId = value["codeId"].asString();
-    info.code = value["verifyCode"].asString();
-    info.email = value["email"].asString();
+    info.codeId = value[CODE_JSON_FIELD_CODE_ID].asString();
+    info.code = value[CODE_JSON_FIELD_CODE].asString();
+    info.email = value[CODE_JSON_FIELD_EMAIL].asString();
     try {
-        info.createTime = static_cast<std::time_t>(std::stoll(value["createTime"].asString()));
+        info.createTime = static_cast<std::time_t>(std::stoll(value[CODE_JSON_FIELD_CREATE_TIME].asString()));
     } catch (const std::exception& e) {
         WRN("验证码创建时间解析失败, codeId: {}, 原因: {}", codeId, e.what());
         info.createTime = 0;

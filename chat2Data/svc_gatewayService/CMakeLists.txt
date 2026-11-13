@@ -51,11 +51,17 @@ if(NOT TARGET common)
     target_include_directories(common PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../common)
 endif()
 
+# RPC接口代码静态库（网关调用子服务时使用proto生成的客户端桩代码）
+if(NOT TARGET proto)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../proto ${CMAKE_BINARY_DIR}/proto)
+endif()
+
 # 查找bite_scaffold库（httplib、gflags、spdlog、jsoncpp、brpc、etcd等由它传递提供）
 find_package(bite_scaffold REQUIRED)
 
 # 链接库设置
 target_link_libraries(${PROJECT_NAME} PRIVATE
     common
+    proto
     bite_scaffold::bite_scaffold
 )

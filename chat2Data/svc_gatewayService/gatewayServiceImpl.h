@@ -12,8 +12,8 @@ namespace GatewayService {
 /**
  * @brief 网关HTTP接口定义与路由绑定类
  *
- * 该类负责30个HTTP接口的定义，与HTTP服务器搭建解耦。
- * 骨架阶段仅注册已实现的健康检测接口，其余业务接口待实现后再注册路由。
+ * 该类负责HTTP接口的定义，与HTTP服务器搭建解耦。
+ * 当前已实现健康检测接口与用户子服务的9个业务接口，其余业务接口待实现后再注册路由。
  * 同时持有服务信道管理对象，供各业务接口实现时获取RPC服务Channel。
  */
 class GatewayServiceImpl {
@@ -33,7 +33,7 @@ public:
      * @brief 绑定HTTP路由
      * @param server cpp-httplib的HTTP服务器对象
      *
-     * @note 骨架阶段仅绑定健康检测接口，未实现的业务接口不注册
+     * @note 绑定路由前先设置前端静态资源目录，未实现的业务接口不注册
      */
     void bindRoutes(httplib::Server& server);
 
@@ -53,30 +53,114 @@ public:
 
 private:
     /**
+     * @brief 发送JSON响应
+     * @param res HTTP响应对象
+     * @param jsonData JSON字符串
+     * @param statusCode HTTP状态码
+     */
+    void sendJsonResponse(httplib::Response& res, const std::string& jsonData, int statusCode = 200);
+
+    /**
+     * @brief 发送错误响应
+     * @param res HTTP响应对象
+     * @param requestId 请求ID
+     * @param errorCode 业务错误码
+     * @param errorMsg 错误描述
+     * @param statusCode HTTP状态码
+     */
+    void sendErrorResponse(httplib::Response& res, const std::string& requestId, int errorCode,
+                           const std::string& errorMsg, int statusCode = 200);
+
+    /**
+     * @brief 通过用户子服务检测会话是否有效
+     * @param requestId 请求ID
+     * @param sessionId 会话ID
+     * @param res HTTP响应对象，鉴权失败时直接写入错误响应
+     * @param userId 鉴权成功时通过引用参数带出用户ID
+     * @return 鉴权成功返回true，失败返回false
+     */
+    bool validateSession(const std::string& requestId, const std::string& sessionId, httplib::Response& res,
+                         std::string& userId);
+
+    /**
      * @brief 处理健康检测请求
      * @param req HTTP请求对象
      * @param res HTTP响应对象
      */
     void handleHealthCheck(const httplib::Request& req, httplib::Response& res);
 
-    // 用户子服务接口（9个，待实现）
-    // POST /api/user/valid/nickname
-    void handleCheckNicknameUnique(const httplib::Request& req, httplib::Response& res);
-    // POST /api/user/valid/email
-    void handleCheckEmailUnique(const httplib::Request& req, httplib::Response& res);
-    // POST /api/user/register
-    void handleRegisterUser(const httplib::Request& req, httplib::Response& res);
-    // POST /api/user/passwd/login
+    // 用户子服务接口（9个）
+    /**
+     * @brief 检测用户昵称是否唯一
+     * @param req HTTP请求对象
+     * @param res HTTP响应对象
+     * @note 接口：POST /api/user/valid/nickname
+     */
+    void handleValidNickname(const httplib::Request& req, httplib::Response& res);
+
+    /**
+     * @brief 检测用户邮箱是否唯一
+     * @param req HTTP请求对象
+     * @param res HTTP响应对象
+     * @note 接口：POST /api/user/valid/email
+     */
+    void handleValidEmail(const httplib::Request& req, httplib::Response& res);
+
+    /**
+     * @brief 用户注册
+     * @param req HTTP请求对象
+     * @param res HTTP响应对象
+     * @note 接口：POST /api/user/register
+     */
+    void handleUserRegister(const httplib::Request& req, httplib::Response& res);
+
+    /**
+     * @brief 密码登录
+     * @param req HTTP请求对象
+     * @param res HTTP响应对象
+     * @note 接口：POST /api/user/passwd/login
+     */
     void handlePasswordLogin(const httplib::Request& req, httplib::Response& res);
-    // POST /api/user/code
+
+    /**
+     * @brief 获取验证码
+     * @param req HTTP请求对象
+     * @param res HTTP响应对象
+     * @note 接口：POST /api/user/code
+     */
     void handleGetVerifyCode(const httplib::Request& req, httplib::Response& res);
-    // POST /api/user/vcode/login
+
+    /**
+     * @brief 验证码登录
+     * @param req HTTP请求对象
+     * @param res HTTP响应对象
+     * @note 接口：POST /api/user/vcode/login
+     */
     void handleVerifyCodeLogin(const httplib::Request& req, httplib::Response& res);
-    // POST /api/user/session/login
+
+    /**
+     * @brief 会话登录
+     * @param req HTTP请求对象
+     * @param res HTTP响应对象
+     * @note 接口：POST /api/user/session/login
+     */
     void handleSessionLogin(const httplib::Request& req, httplib::Response& res);
-    // POST /api/user/logout
+
+    /**
+     * @brief 退出登录
+     * @param req HTTP请求对象
+     * @param res HTTP响应对象
+     * @note 接口：POST /api/user/logout，调用RPC前先进行会话鉴权
+     */
     void handleLogout(const httplib::Request& req, httplib::Response& res);
-    // POST /api/user/info
+
+    /**
+     * @brief 获取用户信息
+     * @param req HTTP请求对象
+     * @param res HTTP响应对象
+     * @note 接口：/api/user/info?requestId={requestId}&sessionId={sessionId}&userId={userId}
+     *       调用RPC前先进行会话鉴权
+     */
     void handleGetUserInfo(const httplib::Request& req, httplib::Response& res);
 
     // 文件子服务接口（9个，待实现）
@@ -135,6 +219,7 @@ private:
 
 private:
     biterpc::SvcChannels::ptr _svcChannels; // 服务信道管理对象
+    std::string _staticResourcesPath;       // 前端静态资源目录
 };
 
 } // namespace GatewayService
