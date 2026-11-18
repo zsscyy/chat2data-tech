@@ -64,6 +64,9 @@ std::string error2String(ErrorCode code) {
         {ErrorCode::FILE_SQLITE_FILE_NOT_FOUND, "SQLite文件不存在"},
         {ErrorCode::FILE_EXCEL_WORKSHEETS_GET_FAILED, "获取Excel工作表列表失败"},
         {ErrorCode::FILE_STORAGE_SERVICE_FAILED, "存储子服务调用失败"},
+        {ErrorCode::FILE_DOWNLOAD_FASTDFS_FAILED, "文件从FastDFS下载失败"},
+        {ErrorCode::FILE_QUERY_FAILED, "文件信息查询失败"},
+        {ErrorCode::FILE_UNKNOWN_ERROR, "文件子服务未知错误"},
         
         // 数据库子服务错误码描述符
         {ErrorCode::DB_PARAM_INVALID, "参数无效"},

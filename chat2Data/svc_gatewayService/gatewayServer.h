@@ -10,6 +10,10 @@
 
 #include "gatewayServiceImpl.h"
 
+namespace bitesvc {
+class SvcWatcher;
+} // namespace bitesvc
+
 namespace GatewayService {
 
 /**
@@ -26,11 +30,13 @@ public:
      * @param port 服务器绑定端口
      * @param server cpp-httplib的HTTP服务器对象
      * @param serviceImpl HTTP接口定义对象
+     * @param serviceWatcher 服务发现对象，必须由服务器持有以保证监控线程存活
      *
      * @note 构造方法中完成服务器实例与接口定义实例的初始化
      */
     GatewayServer(const std::string& host, int port, std::shared_ptr<httplib::Server> server,
-                  std::shared_ptr<GatewayServiceImpl> serviceImpl);
+                  std::shared_ptr<GatewayServiceImpl> serviceImpl,
+                  std::shared_ptr<bitesvc::SvcWatcher> serviceWatcher);
 
     /**
      * @brief 析构函数
@@ -65,6 +71,7 @@ private:
     int _port;                                               // 服务器绑定端口
     std::shared_ptr<httplib::Server> _server;                // HTTP服务器实例
     std::shared_ptr<GatewayServiceImpl> _serviceImpl;        // HTTP接口定义实例
+    std::shared_ptr<bitesvc::SvcWatcher> _serviceWatcher;    // 服务发现对象，保持watcher生命周期
     std::atomic<bool> _isRunning;                            // 服务器运行状态标志
     std::thread _serverThread;                               // 服务器运行线程
 };

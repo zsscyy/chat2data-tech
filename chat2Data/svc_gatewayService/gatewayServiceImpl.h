@@ -3,6 +3,8 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <utility>
+#include <vector>
 
 #include <httplib.h>
 #include <bite_scaffold/rpc.h>
@@ -162,6 +164,17 @@ private:
      *       调用RPC前先进行会话鉴权
      */
     void handleGetUserInfo(const httplib::Request& req, httplib::Response& res);
+
+    /**
+     * @brief 校验请求体中的必填字段是否为空
+     * @param requestId 请求ID，仅用于错误响应
+     * @param fields    待校验字段名与值
+     * @param res       HTTP响应对象
+     * @return 全部非空返回true；存在空字段时写入400响应并返回false
+     */
+    bool validateRequiredFields(const std::string& requestId,
+                                const std::vector<std::pair<std::string, std::string>>& fields,
+                                httplib::Response& res);
 
     // 文件子服务接口（9个，待实现）
     // POST /api/file/upload/info

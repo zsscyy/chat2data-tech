@@ -102,6 +102,8 @@ add_library(dataAccess STATIC
     userData.cc
     sessionData.cc
     verifyCodeData.cc
+    fileInfoData.cc
+    worksheetData.cc
 )
 target_include_directories(dataAccess PUBLIC ${DATA_SOURCE_DIR})
 target_link_libraries(dataAccess PUBLIC

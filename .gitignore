@@ -28,3 +28,6 @@ compile_commands.json
 
 # TRAE 本地规则（未入库）
 .trae/
+
+# locally built test binary
+chat2Data/test/svc_dbService/*/main

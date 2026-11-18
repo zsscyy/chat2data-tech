@@ -1,0 +1,56 @@
+# ==============================================================================
+# 文件子服务构建配置
+# ==============================================================================
+#
+# 可执行文件：FileService
+#
+# 依赖：common、proto、dataAccess、dataEntity、bite_scaffold（brpc/etcd/redis/spdlog/gflags）
+#
+# 构建方式：
+#   1) 推荐在 chat2Data 父目录构建：cmake -S . -B build && cmake --build build
+#   2) 也可在本目录独立构建：cmake -S . -B build && cmake --build build
+#
+# ==============================================================================
+cmake_minimum_required(VERSION 3.10)
+
+project(FileService)
+
+# 独立构建时，父工程未引入 common/proto/data，需要在此补齐
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../common ${CMAKE_CURRENT_BINARY_DIR}/common)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../proto ${CMAKE_CURRENT_BINARY_DIR}/proto)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../data ${CMAKE_CURRENT_BINARY_DIR}/data)
+endif()
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+add_executable(${PROJECT_NAME}
+    main.cc
+    common.cc
+    fileBusiness.cc
+    fileServiceImpl.cc
+    fileServer.cc
+    fileServerBuilder.cc
+)
+
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+)
+
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+
+# 查找bite_scaffold库（brpc、etcd、redis++、spdlog、gflags等由它传递提供）
+find_package(bite_scaffold REQUIRED)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE
+    common
+    proto
+    dataAccess
+    dataEntity
+    bite_scaffold::bite_scaffold
+    odb
+    odb-mysql
+    crypt
+    pthread
+)

@@ -19,7 +19,7 @@ DEFINE_string(conf, "", "配置文件路径（gflags flagfile 格式）");
 // ---------- 通知子服务配置 ----------
 DEFINE_int32(notify_listen_port, 9002, "通知子服务监听端口");
 DEFINE_string(notify_service_name, "NotifyService", "通知子服务名称，用于etcd注册");
-DEFINE_string(notify_service_addr, "192.168.150.129", "通知子服务注册地址（必须是其他服务可达的地址）");
+DEFINE_string(notify_service_addr, "dev-env-service", "通知子服务注册地址（必须是其他容器可达的地址）");
 DEFINE_string(etcd_addr, "http://dev-etcd:2379", "ETCD注册中心地址");
 
 // ---------- 邮箱配置 ----------

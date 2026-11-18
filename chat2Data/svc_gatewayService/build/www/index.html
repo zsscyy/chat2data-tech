@@ -3,77 +3,416 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>首页 - Chat2Data</title>
+    <title>Chat2Data - 智能数据分析助手</title>
+    <link rel="icon" href="data:,">
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body class="app-page">
-<header class="app-header">
-    <div class="brand">
-        <span class="brand-mark">C2</span>
-        <span>Chat2Data</span>
-    </div>
-    <div class="app-header-right">
-        <div class="user-badge">
-            <span class="user-avatar" id="user-avatar">U</span>
-            <span id="header-nickname">加载中...</span>
+<div id="app-loading" class="app-loading">
+    <div class="spinner"></div>
+    <div>正在加载用户信息...</div>
+</div>
+
+<div id="app-shell" class="app-shell form-hidden">
+    <header class="app-header">
+        <div class="brand">
+            <span class="brand-mark">C2</span>
+            <span>Chat2Data</span>
         </div>
-        <button class="btn-secondary" id="logout-button" type="button">退出登录</button>
-    </div>
-</header>
+        <div class="app-header-right">
+            <div class="user-badge">
+                <span class="user-avatar" id="user-avatar">U</span>
+                <span id="header-nickname">加载中...</span>
+            </div>
+            <button class="btn-secondary" id="logout-button" type="button">退出登录</button>
+        </div>
+    </header>
 
-<main class="app-main">
-    <div id="page-loading" class="loading-block">
-        <div class="spinner"></div>
-        <div>正在加载用户信息...</div>
-    </div>
+    <aside class="app-sidebar">
+        <nav class="app-nav" aria-label="主导航">
+            <a class="nav-item" href="#excel" data-view="excel">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                    <path d="M3 9h18M3 15h18M9 3v18M15 3v18"/>
+                </svg>
+                <span>聊天 Excel 助手</span>
+            </a>
+            <a class="nav-item" href="#database" data-view="database">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <ellipse cx="12" cy="5" rx="8" ry="3"/>
+                    <path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/>
+                    <path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/>
+                </svg>
+                <span>数据库助手</span>
+            </a>
+            <a class="nav-item" href="#files" data-view="files">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M4 6a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/>
+                </svg>
+                <span>我的文件</span>
+            </a>
+            <a class="nav-item" href="#history" data-view="history">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="8"/>
+                    <path d="M12 8v5l3 2"/>
+                </svg>
+                <span>历史会话</span>
+            </a>
+            <a class="nav-item" href="#profile" data-view="profile">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="8" r="3.5"/>
+                    <path d="M5 20c0-3.3 3.1-5.5 7-5.5s7 2.2 7 5.5"/>
+                </svg>
+                <span>个人中心</span>
+            </a>
+        </nav>
 
-    <div id="page-content" class="form-hidden">
-        <div id="message" class="message"></div>
+        <div class="sidebar-footer">
+            <div class="sidebar-footer-title">服务状态</div>
+            <div class="sidebar-status">
+                <span>文件服务</span>
+                <span class="status-tag done">已开放</span>
+            </div>
+            <div class="sidebar-status">
+                <span>AI / 数据库</span>
+                <span class="status-tag pending">待开放</span>
+            </div>
+        </div>
+    </aside>
 
-        <section class="panel">
-            <h1 class="panel-title" id="welcome-title">欢迎回来</h1>
-            <p class="panel-desc">您已成功登录 Chat2Data，以下是当前账号信息。</p>
+    <main class="app-content">
+        <div id="message" class="message app-message"></div>
 
-            <div class="info-grid">
-                <div class="info-item">
-                    <div class="info-label">用户ID</div>
-                    <div class="info-value" id="user-id">-</div>
+        <section class="view-section" data-view="excel">
+            <div class="excel-layout">
+                <aside class="panel excel-sessions">
+                    <div class="excel-sessions-head">
+                        <h2 class="excel-block-title">AI 对话</h2>
+                    </div>
+                    <button class="btn-secondary excel-new-session" id="excel-new-session" type="button"
+                            disabled title="AI 子服务未实现">新建会话
+                    </button>
+                    <div class="excel-session-empty">
+                        <div class="excel-session-empty-title">AI 会话功能待开放</div>
+                        <p>AI 子服务接入后可在此创建和管理会话。</p>
+                    </div>
+                </aside>
+
+                <div class="excel-main">
+                    <div id="excel-message" class="message excel-message"></div>
+
+                    <div class="panel excel-panel">
+                        <div class="excel-toolbar">
+                            <div class="excel-current-file">
+                                <div class="excel-toolbar-label">当前文件</div>
+                                <div class="excel-current-file-name" id="excel-current-file-name">未选择文件</div>
+                            </div>
+                            <div class="excel-toolbar-actions">
+                                <input class="form-hidden" id="excel-file-input" type="file" accept=".xlsx">
+                                <button class="btn-primary excel-btn-inline" id="excel-upload-trigger" type="button">
+                                    上传 Excel
+                                </button>
+                                <button class="btn-secondary" id="excel-refresh-button" type="button">刷新文件列表
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="excel-local-file form-hidden" id="excel-local-file">
+                            <div class="excel-local-file-info">
+                                <div class="info-label">待上传文件</div>
+                                <div class="info-value" id="excel-local-file-name">-</div>
+                                <div class="excel-local-file-meta" id="excel-local-file-meta">-</div>
+                            </div>
+                            <div class="excel-local-file-actions">
+                                <button class="btn-primary excel-btn-inline" id="excel-upload-button" type="button">
+                                    上传
+                                </button>
+                                <button class="btn-secondary" id="excel-clear-file-button" type="button">取消</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel excel-panel">
+                        <div class="excel-block-head">
+                            <h2 class="excel-block-title">文件列表</h2>
+                            <span class="excel-block-hint" id="excel-file-count">共 0 个文件</span>
+                        </div>
+                        <div class="excel-file-list" id="excel-file-list">
+                            <div class="excel-empty">正在加载文件列表...</div>
+                        </div>
+                    </div>
+
+                    <div class="panel excel-panel">
+                        <div class="excel-block-head">
+                            <h2 class="excel-block-title">文件预览</h2>
+                            <div class="excel-file-actions">
+                                <button class="btn-mini" id="excel-download-selected" type="button" disabled>下载</button>
+                                <button class="btn-mini btn-mini-danger" id="excel-delete-selected" type="button"
+                                        disabled>删除
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="excel-file-info form-hidden" id="excel-file-info">
+                            <div><span class="excel-meta-label">文件名：</span><span id="excel-info-name">-</span></div>
+                            <div><span class="excel-meta-label">大小：</span><span id="excel-info-size">-</span></div>
+                            <div><span class="excel-meta-label">上传时间：</span><span id="excel-info-time">-</span></div>
+                            <div><span class="excel-meta-label">关联会话：</span><span id="excel-info-chat">-</span></div>
+                        </div>
+
+                        <div class="sheet-tabs" id="excel-sheet-tabs"></div>
+
+                        <div class="excel-table-wrap" id="excel-table-wrap">
+                            <div class="excel-empty">请选择文件查看预览</div>
+                        </div>
+
+                        <div class="excel-preview-footer form-hidden" id="excel-preview-footer">
+                            <div class="excel-pagination">
+                                <button class="btn-mini" id="excel-prev-page" type="button">上一页</button>
+                                <span id="excel-page-indicator">第 1 / 1 页</span>
+                                <button class="btn-mini" id="excel-next-page" type="button">下一页</button>
+                            </div>
+                            <label class="excel-page-size">
+                                每页
+                                <select id="excel-page-size">
+                                    <option value="20">20</option>
+                                    <option value="50" selected>50</option>
+                                    <option value="100">100</option>
+                                </select>
+                                条
+                            </label>
+                        </div>
+
+                        <div class="excel-preview-hint form-hidden" id="excel-preview-hint"></div>
+                    </div>
+
+                    <div class="panel excel-chat">
+                        <div class="excel-chat-input-row">
+                            <input class="form-input" id="excel-chat-input" type="text"
+                                   placeholder="AI 子服务待开放，暂不能自然语言操作 Excel" disabled>
+                            <button class="btn-primary excel-btn-inline" id="excel-chat-send" type="button" disabled>
+                                发送
+                            </button>
+                        </div>
+                        <div class="excel-chat-hint">AI 子服务待开放，暂不能自然语言操作 Excel</div>
+                    </div>
                 </div>
-                <div class="info-item">
-                    <div class="info-label">昵称</div>
-                    <div class="info-value" id="user-nickname">-</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">邮箱</div>
-                    <div class="info-value" id="user-email">-</div>
+            </div>
+
+            <div class="modal-mask form-hidden" id="excel-confirm-mask">
+                <div class="modal-card">
+                    <div class="modal-title">确认删除</div>
+                    <div class="modal-text" id="excel-confirm-text"></div>
+                    <div class="modal-actions">
+                        <button class="btn-secondary" id="excel-confirm-cancel" type="button">取消</button>
+                        <button class="btn-danger" id="excel-confirm-ok" type="button">删除</button>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <section class="panel">
-            <h2 class="panel-title">功能状态</h2>
-            <p class="panel-desc">当前网关已开放用户子服务接口，其余业务模块正在建设中。</p>
-            <div class="status-list">
-                <div class="status-item">
-                    <span class="status-name">用户注册与登录</span>
-                    <span class="status-tag done">已开放</span>
-                </div>
-                <div class="status-item">
-                    <span class="status-name">智能 Excel 助手</span>
+        <section class="view-section" data-view="database">
+            <div class="panel">
+                <div class="view-heading">
+                    <div>
+                        <h1 class="panel-title">数据库助手</h1>
+                        <p class="panel-desc">连接 MySQL 或 SQLite，用自然语言查询和分析数据库表。</p>
+                    </div>
                     <span class="status-tag pending">待开放</span>
                 </div>
-                <div class="status-item">
-                    <span class="status-name">智能 DB 助手</span>
-                    <span class="status-tag pending">待开放</span>
+
+                <div class="db-tabs" role="tablist" aria-label="数据库类型">
+                    <button class="db-tab active" id="db-tab-mysql" type="button" role="tab"
+                            data-db-tab="mysql" aria-selected="true">MySQL
+                    </button>
+                    <button class="db-tab" id="db-tab-sqlite" type="button" role="tab"
+                            data-db-tab="sqlite" aria-selected="false">SQLite
+                    </button>
+                </div>
+
+                <div class="db-notice">数据库子服务尚未实现，暂不可用</div>
+
+                <div class="db-pane" data-db-pane="mysql">
+                    <div class="db-form-grid">
+                        <div class="form-group">
+                            <label class="form-label" for="db-mysql-host">主机</label>
+                            <input class="form-input" id="db-mysql-host" type="text" value="127.0.0.1" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="db-mysql-port">端口</label>
+                            <input class="form-input" id="db-mysql-port" type="number" value="3306" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="db-mysql-username">用户名</label>
+                            <input class="form-input" id="db-mysql-username" type="text"
+                                   placeholder="请输入用户名" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="db-mysql-password">密码</label>
+                            <input class="form-input" id="db-mysql-password" type="password"
+                                   placeholder="请输入密码" disabled>
+                        </div>
+                        <div class="form-group db-form-full">
+                            <label class="form-label" for="db-mysql-database">数据库</label>
+                            <input class="form-input" id="db-mysql-database" type="text"
+                                   placeholder="请输入数据库名" disabled>
+                        </div>
+                    </div>
+                    <div class="db-form-actions">
+                        <button class="btn-primary excel-btn-inline" id="db-mysql-connect" type="button"
+                                disabled title="数据库子服务未实现">连接
+                        </button>
+                        <button class="btn-secondary" id="db-mysql-disconnect" type="button"
+                                disabled title="数据库子服务未实现">断开连接
+                        </button>
+                    </div>
+
+                    <div class="db-section">
+                        <h3 class="db-section-title">连接状态</h3>
+                        <div class="db-empty" id="db-mysql-status">未连接（数据库子服务尚未实现）</div>
+                    </div>
+
+                    <div class="db-section">
+                        <h3 class="db-section-title">表列表</h3>
+                        <div class="db-empty" id="db-mysql-tables">数据库子服务尚未实现，暂不可用</div>
+                    </div>
+
+                    <div class="db-section">
+                        <h3 class="db-section-title">表数据预览</h3>
+                        <div class="db-empty" id="db-mysql-table-data">数据库子服务尚未实现，暂不可用</div>
+                    </div>
+
+                    <div class="db-section">
+                        <h3 class="db-section-title">查询 / 对话</h3>
+                        <div class="db-chat-row">
+                            <input class="form-input" id="db-chat-input" type="text"
+                                   placeholder="数据库子服务尚未实现，暂不可用" disabled>
+                            <button class="btn-primary excel-btn-inline" id="db-chat-send" type="button" disabled>
+                                发送
+                            </button>
+                        </div>
+                        <p class="db-hint">数据库子服务尚未实现，暂不可用</p>
+                    </div>
+                </div>
+
+                <div class="db-pane form-hidden" data-db-pane="sqlite">
+                    <div class="db-upload-card">
+                        <div class="form-group">
+                            <label class="form-label" for="db-sqlite-file">SQLite 文件（.db）</label>
+                            <input class="form-input db-file-input" id="db-sqlite-file" type="file" accept=".db">
+                        </div>
+                        <button class="btn-primary excel-btn-inline" id="db-sqlite-upload" type="button">
+                            上传 SQLite 文件
+                        </button>
+                        <div class="message db-sqlite-message" id="db-sqlite-message"></div>
+                        <div class="db-sqlite-result form-hidden" id="db-sqlite-result">
+                            文件ID：<span id="db-sqlite-file-id">-</span>
+                        </div>
+                    </div>
+
+                    <div class="db-section">
+                        <h3 class="db-section-title">连接状态</h3>
+                        <div class="db-empty" id="db-sqlite-status">未连接（数据库子服务尚未实现）</div>
+                    </div>
+
+                    <div class="db-section">
+                        <h3 class="db-section-title">表列表</h3>
+                        <div class="db-empty" id="db-sqlite-tables">数据库子服务尚未实现，暂不可用</div>
+                    </div>
+
+                    <div class="db-section">
+                        <h3 class="db-section-title">表数据预览</h3>
+                        <div class="db-empty" id="db-sqlite-table-data">数据库子服务尚未实现，暂不可用</div>
+                    </div>
                 </div>
             </div>
         </section>
-    </div>
-</main>
+
+        <section class="view-section" data-view="files">
+            <div class="panel">
+                <div class="view-heading">
+                    <div>
+                        <h1 class="panel-title">我的文件</h1>
+                        <p class="panel-desc" id="files-count">共 0 个文件</p>
+                    </div>
+                    <button class="btn-secondary" id="files-refresh-button" type="button">刷新</button>
+                </div>
+                <div id="files-message" class="message files-message"></div>
+                <div class="excel-table-wrap files-table-wrap" id="files-table-wrap">
+                    <div class="excel-empty">正在加载文件列表...</div>
+                </div>
+            </div>
+
+            <div class="modal-mask form-hidden" id="files-confirm-mask">
+                <div class="modal-card">
+                    <div class="modal-title">确认删除</div>
+                    <div class="modal-text" id="files-confirm-text"></div>
+                    <div class="modal-actions">
+                        <button class="btn-secondary" id="files-confirm-cancel" type="button">取消</button>
+                        <button class="btn-danger" id="files-confirm-ok" type="button">删除</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="view-section" data-view="history">
+            <div class="panel">
+                <div class="view-heading">
+                    <div>
+                        <h1 class="panel-title">历史会话</h1>
+                        <p class="panel-desc">查看并管理之前的聊天会话记录。</p>
+                    </div>
+                    <span class="status-tag pending">待开放</span>
+                </div>
+                <div class="placeholder-card">
+                    <div class="placeholder-title" id="history-empty-title">AI 子服务尚未实现，历史会话暂不可用</div>
+                    <p class="placeholder-text" id="history-empty-text">AI 子服务接入后可在此查看历史会话。</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="view-section" data-view="profile">
+            <div class="panel">
+                <div class="view-heading">
+                    <div>
+                        <h1 class="panel-title">个人中心</h1>
+                        <p class="panel-desc">当前登录账号信息。</p>
+                    </div>
+                    <button class="btn-secondary" id="profile-logout-button" type="button">退出登录</button>
+                </div>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">用户ID</div>
+                        <div class="info-value" id="profile-user-id">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">昵称</div>
+                        <div class="info-value" id="profile-nickname">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">邮箱</div>
+                        <div class="info-value" id="profile-email">-</div>
+                    </div>
+                </div>
+                <p class="profile-note">当前版本暂不支持修改用户资料。</p>
+            </div>
+        </section>
+    </main>
+</div>
 
 <script src="/js/config.js"></script>
 <script src="/js/api.js"></script>
 <script src="/js/auth.js"></script>
-<script src="/js/index.js"></script>
+<script src="/js/app.js"></script>
+<script src="/js/excel-page.js"></script>
+<script src="/js/db-page.js"></script>
+<script src="/js/files-page.js"></script>
+<script src="/js/history-page.js"></script>
+<script src="/js/profile-page.js"></script>
 </body>
 </html>

@@ -21,7 +21,7 @@ DEFINE_string(conf, "", "配置文件路径（gflags flagfile 格式）");
 // ---------- 服务配置 ----------
 DEFINE_int32(listen_port, 9100, "服务监听端口");
 DEFINE_string(service_name, "UserService", "服务名称，用于etcd注册");
-DEFINE_string(service_addr, "127.0.0.1", "服务注册地址（必须是其他服务可达的地址，不要填0.0.0.0）");
+DEFINE_string(service_addr, "dev-env-service", "服务注册地址（必须是其他容器可达的地址，不要填127.0.0.1或0.0.0.0）");
 DEFINE_string(notify_service, "NotifyService", "通知子服务名称");
 DEFINE_string(db_service, "DatabaseService", "数据库子服务名称");
 DEFINE_string(etcd_addr, "http://dev-etcd:2379", "ETCD注册中心地址");

@@ -13,11 +13,13 @@ const int HTTP_READ_WRITE_TIMEOUT_SECONDS = 300;
 } // namespace
 
 GatewayServer::GatewayServer(const std::string& host, int port, std::shared_ptr<httplib::Server> server,
-                             std::shared_ptr<GatewayServiceImpl> serviceImpl)
+                             std::shared_ptr<GatewayServiceImpl> serviceImpl,
+                             std::shared_ptr<bitesvc::SvcWatcher> serviceWatcher)
     : _host(host)
     , _port(port)
     , _server(std::move(server))
     , _serviceImpl(std::move(serviceImpl))
+    , _serviceWatcher(std::move(serviceWatcher))
     , _isRunning(false) {
     INF("GatewayServer initialized with host: {}, port: {}", _host, _port);
 }
@@ -83,6 +85,12 @@ void GatewayServer::stop() {
         _serverThread.join();
     }
 
+    // 释放服务发现对象，停止 etcd watcher 的后台线程
+    if (_serviceWatcher) {
+        _serviceWatcher.reset();
+        INF("Service watcher stopped");
+    }
+
     INF("GatewayServer stopped successfully");
 }
 
@@ -130,7 +138,9 @@ std::shared_ptr<GatewayServer> GatewayServerBuilder::build() {
             ERR("Service watcher failed to watch services");
             return;
         }
-        INF("Service watcher exited");
+        // watch() 返回表示 etcd watcher 已初始化，后台监控线程由 svcWatcher 持有；
+        // GatewayServer 必须继续持有 svcWatcher，不能在 build() 返回后销毁。
+        INF("Service watcher initialized, background watch running");
     });
     watcherThread.detach();
 
@@ -148,7 +158,8 @@ std::shared_ptr<GatewayServer> GatewayServerBuilder::build() {
     serviceImpl->bindRoutes(*httpServer);
 
     // 7. 构建网关服务器对象
-    auto gatewayServer = std::make_shared<GatewayServer>(_host, _port, httpServer, serviceImpl);
+    auto gatewayServer =
+        std::make_shared<GatewayServer>(_host, _port, httpServer, serviceImpl, svcWatcher);
 
     // 8. 启动服务器
     if (!gatewayServer->start()) {
